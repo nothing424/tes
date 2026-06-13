@@ -1,0 +1,625 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Admin Panel — KitsuneID</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{--bg:#0d0d1a;--card:#13131f;--accent:#7c5cfc;--accent2:#5b3fd4;--text:#e8e8f0;--text2:#8888aa;--border:#2a2a3d;--danger:#ef4444;--success:#22c55e;--warn:#f59e0b;--rl:14px}
+    body{background:var(--bg);color:var(--text);font-family:'Segoe UI',sans-serif;min-height:100vh}
+    #loginScreen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+    .login-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:40px;width:100%;max-width:360px;text-align:center}
+    .login-logo{font-size:28px;font-weight:800;margin-bottom:8px;color:var(--accent)}
+    .login-sub{font-size:13px;color:var(--text2);margin-bottom:28px}
+    #adminScreen{display:none}
+    .admin-nav{background:var(--card);border-bottom:1px solid var(--border);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .admin-logo{font-weight:800;font-size:18px;color:var(--accent)}
+    .admin-body{padding:20px;max-width:800px;margin:0 auto}
+    .tabs{display:flex;gap:4px;background:var(--card);padding:4px;border-radius:var(--rl);margin-bottom:24px;border:1px solid var(--border)}
+    .tab{flex:1;padding:10px;text-align:center;border-radius:10px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text2);border:none;background:none;transition:all .2s}
+    .tab.active{background:var(--accent);color:#fff}
+    .section-title{font-size:16px;font-weight:700;margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+    .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .form-full{grid-column:1/-1}
+    label{display:block;font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+    input,textarea,select{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:border-color .2s}
+    input:focus,textarea:focus,select:focus{border-color:var(--accent)}
+    textarea{resize:vertical;min-height:80px}
+    .ep-builder{border:1px solid var(--border);border-radius:var(--rl);padding:14px}
+    .ep-item{display:grid;grid-template-columns:70px 1fr auto;gap:8px;align-items:center;margin-bottom:8px}
+    .ep-item input{margin:0}
+    .btn-add-ep{width:100%;padding:8px;background:transparent;border:1px dashed var(--border);border-radius:10px;color:var(--text2);cursor:pointer;font-size:13px;margin-top:4px;transition:all .2s}
+    .btn-add-ep:hover{border-color:var(--accent);color:var(--accent)}
+    .btn{padding:11px 20px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;border:none;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+    .btn-primary{background:var(--accent);color:#fff}
+    .btn-primary:hover{background:var(--accent2)}
+    .btn-primary:disabled{opacity:.5;cursor:not-allowed}
+    .btn-danger{background:var(--danger);color:#fff;padding:6px 12px;font-size:12px}
+    .btn-sm{padding:8px 14px;font-size:12px}
+    .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text2)}
+    .btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+    .btn-test{background:rgba(245,158,11,.15);border:1px solid var(--warn);color:var(--warn);padding:10px 16px;font-size:13px;font-weight:600;border-radius:10px;cursor:pointer;width:100%;margin-top:10px}
+    .anime-list{display:flex;flex-direction:column;gap:10px}
+    .anime-item{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:14px;display:flex;gap:12px;align-items:center}
+    .anime-item img{width:44px;height:60px;object-fit:cover;border-radius:8px;flex-shrink:0}
+    .anime-item-info{flex:1;min-width:0}
+    .anime-item-title{font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .anime-item-meta{font-size:12px;color:var(--text2);margin-top:2px}
+    .setup-box{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:20px;margin-bottom:16px}
+    .setup-title{font-weight:700;margin-bottom:4px}
+    .setup-sub{font-size:12px;color:var(--text2);margin-bottom:14px;line-height:1.6}
+    .alert{padding:12px 16px;border-radius:10px;font-size:13px;margin-bottom:16px;line-height:1.5}
+    .alert-success{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--success)}
+    .alert-error{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:var(--danger)}
+    .alert-warn{background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--warn)}
+    .badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+    .badge-ongoing{background:rgba(34,197,94,.15);color:var(--success)}
+    .badge-complete{background:rgba(124,92,252,.15);color:var(--accent)}
+    .empty{text-align:center;padding:40px;color:var(--text2);font-size:13px}
+    .conn-status{padding:8px 12px;border-radius:8px;font-size:12px;font-weight:600;margin-top:8px;display:none}
+    .conn-ok{background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.3);color:var(--success)}
+    .conn-fail{background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:var(--danger)}
+    code{background:var(--bg);padding:2px 6px;border-radius:4px;font-size:12px}
+    @media(max-width:500px){.form-grid{grid-template-columns:1fr}.ep-item{grid-template-columns:60px 1fr auto}}
+  </style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">🦊 KitsuneID</div>
+    <div class="login-sub">Admin Panel</div>
+    <div style="margin-bottom:14px">
+      <label>Password Admin</label>
+      <input type="password" id="pwInput" placeholder="Masukkan password..." onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="doLogin()">Masuk</button>
+    <div id="loginErr" style="color:var(--danger);font-size:12px;margin-top:10px;display:none">❌ Password salah!</div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="adminScreen">
+  <nav class="admin-nav">
+    <div class="admin-logo">🦊 Admin Panel</div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <span id="cacheStatus" style="font-size:12px;color:var(--text2)"></span>
+      <button class="btn btn-outline btn-sm" onclick="clearCache()">Clear Cache</button>
+      <button class="btn btn-outline btn-sm" onclick="doLogout()">Keluar</button>
+    </div>
+  </nav>
+
+  <div class="admin-body">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('upload')">➕ Upload</button>
+      <button class="tab" onclick="switchTab('list')">📋 Daftar</button>
+      <button class="tab" onclick="switchTab('pengumuman')">📢 Notif</button>
+      <button class="tab" onclick="switchTab('setup')">⚙️ Setup</button>
+    </div>
+
+    <div id="alertBox" style="display:none"></div>
+
+    <!-- TAB UPLOAD -->
+    <div id="tab-upload">
+      <div id="connWarning" class="alert alert-warn" style="display:none">
+        ⚠️ Koneksi ke JSONBin belum diverifikasi. Buka tab <strong>⚙️ Setup</strong> dan klik <strong>Test Koneksi</strong> dulu.
+      </div>
+      <div class="section-title">Upload Anime Baru</div>
+      <div class="form-grid">
+        <div class="form-full">
+          <label>Judul Anime *</label>
+          <input id="f-title" type="text" placeholder="Contoh: Jujutsu Kaisen Season 3">
+        </div>
+        <div>
+          <label>Status *</label>
+          <select id="f-status"><option value="Ongoing">Ongoing</option><option value="Complete">Complete</option></select>
+        </div>
+        <div>
+          <label>Tipe</label>
+          <select id="f-type"><option value="TV">TV</option><option value="Movie">Movie</option><option value="OVA">OVA</option><option value="Special">Special</option></select>
+        </div>
+        <div>
+          <label>Rating (0–10)</label>
+          <input id="f-rating" type="number" placeholder="8.5" min="0" max="10" step="0.1">
+        </div>
+        <div>
+          <label>Studio</label>
+          <input id="f-studio" type="text" placeholder="MAPPA">
+        </div>
+        <div>
+          <label>Tayang</label>
+          <input id="f-aired" type="text" placeholder="Jan 2025">
+        </div>
+        <div>
+          <label>Durasi per Episode</label>
+          <input id="f-duration" type="text" placeholder="24 min.">
+        </div>
+        <div>
+          <label>Genre (pisahkan koma)</label>
+          <input id="f-genres" type="text" placeholder="Action, Fantasy, Shounen">
+        </div>
+        <div class="form-full">
+          <label>URL Cover/Poster *</label>
+          <input id="f-thumb" type="url" placeholder="https://...jpg" oninput="previewThumb()">
+        </div>
+        <div class="form-full" id="thumbPreviewBox" style="display:none">
+          <img id="thumbPreview" style="height:120px;border-radius:10px;object-fit:cover">
+        </div>
+        <div class="form-full">
+          <label>Sinopsis</label>
+          <textarea id="f-synopsis" placeholder="Tulis sinopsis anime..."></textarea>
+        </div>
+        <div class="form-full">
+          <label>Daftar Episode + URL Video</label>
+          <div class="ep-builder">
+            <div style="display:grid;grid-template-columns:70px 1fr;gap:8px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid var(--border)">
+              <span style="font-size:11px;color:var(--text2);font-weight:700">EP #</span>
+              <span style="font-size:11px;color:var(--text2);font-weight:700">URL Embed Video</span>
+            </div>
+            <div id="epList"></div>
+            <button class="btn-add-ep" onclick="addEpRow()">+ Tambah Episode</button>
+          </div>
+          <div style="margin-top:8px;padding:10px;background:var(--card);border-radius:8px;font-size:12px;color:var(--text2);line-height:1.7">
+            💡 <strong style="color:var(--text)">Format URL Video yang didukung:</strong><br>
+            • YouTube: <code>https://www.youtube.com/embed/VIDEO_ID</code><br>
+            • Google Drive: <code>https://drive.google.com/file/d/FILE_ID/preview</code><br>
+            • Langsung tempel URL embed dari sumber lain
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
+        <button class="btn btn-primary" id="saveBtn" onclick="submitAnime()">💾 Simpan Anime</button>
+        <button class="btn btn-outline" onclick="clearForm()">🗑 Reset Form</button>
+      </div>
+    </div>
+
+    <!-- TAB DAFTAR -->
+    <div id="tab-list" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div class="section-title" style="margin:0;border:none">Anime yang Diupload</div>
+        <button class="btn btn-outline btn-sm" onclick="loadAnimeList()">🔄 Refresh</button>
+      </div>
+      <div id="animeListContainer"><div class="empty">Buka tab ini untuk memuat data.</div></div>
+    </div>
+
+    <!-- TAB SETUP -->
+    <div id="tab-pengumuman" style="display:none">
+      <div class="setup-box">
+        <div class="setup-title" style="color:#f59e0b">📢 Pengumuman / Banner</div>
+        <div class="setup-sub">Tampil sebagai banner di halaman Home. Kosongkan untuk menyembunyikan.</div>
+        <div style="margin-bottom:10px">
+          <label>Tipe</label>
+          <select id="ann-type" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px">
+            <option value="info">ℹ️ Info</option>
+            <option value="warning">⚠️ Peringatan</option>
+            <option value="success">✅ Update</option>
+            <option value="danger">🔴 Penting</option>
+          </select>
+        </div>
+        <div style="margin-bottom:10px">
+          <label>Pesan</label>
+          <textarea id="ann-msg" rows="3" placeholder="Tulis pengumuman di sini... (kosongkan untuk hapus)" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:13px;resize:vertical;box-sizing:border-box"></textarea>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary btn-sm" style="flex:1;justify-content:center" onclick="saveAnnouncement()">💾 Simpan & Tampilkan</button>
+          <button class="btn btn-sm" style="background:var(--danger);color:#fff;justify-content:center" onclick="clearAnnouncement()">🗑️ Hapus</button>
+        </div>
+        <div id="ann-preview" style="margin-top:14px;display:none"></div>
+      </div>
+    </div>
+    <div id="tab-setup" style="display:none">
+      <div class="setup-box" style="border-color:var(--accent)">
+        <div class="setup-title" style="color:var(--accent)">🔗 Setup JSONBin</div>
+        <div class="setup-sub">
+          Isi Bin ID dan API Key dari akun JSONBin kamu, lalu klik <strong>Simpan & Test</strong>.
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <label>Bin ID</label>
+            <input id="cfg-binid" placeholder="699c6ab843b1c97be996c684" type="text">
+          </div>
+          <div>
+            <label>API Key (X-Master-Key)</label>
+            <input id="cfg-apikey" placeholder="$2a$10$..." type="password">
+            <div style="font-size:11px;color:var(--text2);margin-top:4px">Di JSONBin: klik foto profil → API Keys → copy key-nya</div>
+          </div>
+          <button class="btn btn-primary" id="testBtn" style="width:100%;justify-content:center" onclick="saveAndTest()">💾 Simpan & Test Koneksi</button>
+        </div>
+        <div id="connStatus" class="conn-status"></div>
+      </div>
+
+      <div class="setup-box" style="border-color:#2563eb">
+        <div class="setup-title" style="color:#60a5fa">📨 Config Telegram Notif</div>
+        <div class="setup-sub">
+          Setiap ada user login, notif otomatis terkirim ke Telegram kamu.<br>
+          Token disimpan lokal — <strong>tidak masuk ke GitHub</strong>.
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div>
+            <label>Bot Token</label>
+            <input id="cfg-tg-token" type="password" placeholder="123456789:AAFxxx...">
+            <div style="font-size:11px;color:var(--text2);margin-top:4px">Dari @BotFather → /mybots → pilih bot → buat token baru</div>
+          </div>
+          <div>
+            <label>Chat ID</label>
+            <input id="cfg-tg-chat" type="text" placeholder="987654321">
+            <div style="font-size:11px;color:var(--text2);margin-top:4px">Dari @userinfobot — kirim pesan sembarang ke sana</div>
+          </div>
+          <button class="btn btn-primary btn-sm" style="justify-content:center" onclick="saveTelegram()">💾 Simpan Config Telegram</button>
+        </div>
+      </div>
+
+      <div class="setup-box">
+        <div class="setup-title">🔑 Ganti Password Admin</div>
+        <div class="setup-sub">Password default: <code>kitsune2024</code></div>
+        <div style="display:flex;gap:10px">
+          <input id="cfg-password" type="password" placeholder="Password baru..." style="flex:1">
+          <button class="btn btn-primary btn-sm" onclick="savePassword()">Simpan</button>
+        </div>
+      </div>
+
+      <div class="setup-box">
+        <div class="setup-title">📖 Cara Pakai URL Google Drive</div>
+        <div class="setup-sub" style="margin:0">
+          1. Upload video ke Google Drive<br>
+          2. Klik kanan → <strong>Bagikan</strong> → ubah ke <strong>Siapa saja dengan link</strong><br>
+          3. Copy link, ambil bagian <code>FILE_ID</code> dari URL<br>
+          4. Paste di form episode dengan format:<br>
+          <code>https://drive.google.com/file/d/FILE_ID/preview</code>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ADMIN_PW_DEFAULT = 'kitsune2024';
+const RAILWAY_API = 'https://kitsuneid-api-production.up.railway.app';
+// Credentials diambil dari localStorage — diisi lewat tab Setup
+function getBinId()  { return localStorage.getItem('jb_bin_id')  || ''; }
+function getApiKey() { return localStorage.getItem('jb_api_key') || ''; }
+
+// ── Auth ─────────────────────────────────────
+function getAdminPw() {
+  return localStorage.getItem('kitsune_admin_pw') || ADMIN_PW_DEFAULT;
+}
+function doLogin() {
+  const pw = document.getElementById('pwInput').value;
+  if (pw === getAdminPw()) {
+    sessionStorage.setItem('kitsune_auth', '1');
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminScreen').style.display = 'block';
+    addEpRow();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+  }
+}
+function doLogout() {
+  sessionStorage.removeItem('kitsune_auth');
+  location.reload();
+}
+
+// ── Tabs ─────────────────────────────────────
+function switchTab(name) {
+  ['upload','list','pengumuman','setup'].forEach(t => {
+    document.getElementById(`tab-${t}`).style.display = t === name ? 'block' : 'none';
+  });
+  if (name === 'pengumuman') loadAnnouncementTab();
+  document.querySelectorAll('.tab').forEach((b, i) =>
+    b.classList.toggle('active', ['upload','list','pengumuman','setup'][i] === name));
+  if (name === 'list') loadAnimeList();
+}
+
+// ── JSONBin API ───────────────────────────────
+async function jbGet() {
+  const binId = getBinId();
+  const apiKey = getApiKey();
+  if (!binId || !apiKey) throw new Error('Bin ID dan API Key belum diisi! Buka tab ⚙️ Setup.');
+  const r = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+    headers: { 'X-Master-Key': apiKey }
+  });
+  if (!r.ok) {
+    const txt = await r.text();
+    throw new Error(`JSONBin error ${r.status}: ${txt.slice(0, 100)}`);
+  }
+  const d = await r.json();
+  // JSONBin v3 wraps data dalam .record
+  // Kalau .record ada → pakai .record, kalau tidak → data langsung (fallback)
+  const record = d.record ?? d;
+  if (!record.animes) record.animes = [];
+  return record;
+}
+
+async function jbSet(data) {
+  const binId = getBinId();
+  const apiKey = getApiKey();
+  if (!binId || !apiKey) throw new Error('Bin ID dan API Key belum diisi! Buka tab ⚙️ Setup.');
+  const r = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'X-Master-Key': apiKey },
+    body: JSON.stringify(data)
+  });
+  if (!r.ok) {
+    const txt = await r.text();
+    throw new Error(`JSONBin save error ${r.status}: ${txt.slice(0, 100)}`);
+  }
+  return true;
+}
+
+// ── Test Koneksi ──────────────────────────────
+async function testConnection() {
+  const btn = document.getElementById('testBtn');
+  const status = document.getElementById('connStatus');
+  if (btn) { btn.textContent = '⏳ Mengecek...'; btn.disabled = true; }
+  if (status) status.style.display = 'none';
+  try {
+    const data = await jbGet();
+    const count = data.animes?.length || 0;
+    if (status) {
+      status.className = 'conn-status conn-ok';
+      status.textContent = `✅ Koneksi berhasil! Bin berisi ${count} anime.`;
+      status.style.display = 'block';
+    }
+    document.getElementById('connWarning').style.display = 'none';
+    localStorage.setItem('kitsune_conn_ok', '1');
+    showAlert(`✅ Koneksi JSONBin berhasil! ${count} anime tersimpan.`, 'success');
+  } catch(e) {
+    if (status) {
+      status.className = 'conn-status conn-fail';
+      status.textContent = `❌ Gagal: ${e.message}`;
+      status.style.display = 'block';
+    }
+    showAlert(`❌ Koneksi gagal: ${e.message}`, 'error');
+  }
+  if (btn) { btn.textContent = '💾 Simpan & Test Koneksi'; btn.disabled = false; }
+}
+
+// ── Form Episode ──────────────────────────────
+let epCount = 0;
+function addEpRow(num = '', url = '') {
+  epCount++;
+  const n = epCount;
+  const row = document.createElement('div');
+  row.className = 'ep-item';
+  row.id = `eprow-${n}`;
+  row.innerHTML = `
+    <input type="number" placeholder="Ep" value="${num}" class="ep-num-in" min="1">
+    <input type="url" placeholder="https://drive.google.com/file/d/.../preview" value="${url}" class="ep-url-in">
+    <button style="background:var(--danger);border:none;color:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px" onclick="document.getElementById('eprow-${n}').remove()">✕</button>
+  `;
+  document.getElementById('epList').appendChild(row);
+}
+
+function getEpisodes() {
+  return [...document.querySelectorAll('.ep-item')].map((row, i) => {
+    const num = row.querySelector('.ep-num-in')?.value || String(i + 1);
+    const url = row.querySelector('.ep-url-in')?.value?.trim() || '';
+    if (!url) return null;
+    return { episode: num, url, slug: `custom-ep-${num}`, title: `Episode ${num}` };
+  }).filter(Boolean);
+}
+
+function previewThumb() {
+  const url = document.getElementById('f-thumb').value;
+  const box = document.getElementById('thumbPreviewBox');
+  const img = document.getElementById('thumbPreview');
+  if (url.startsWith('http')) { img.src = url; box.style.display = 'block'; }
+  else { box.style.display = 'none'; }
+}
+
+function clearForm() {
+  ['f-title','f-thumb','f-synopsis','f-studio','f-aired','f-duration','f-genres','f-rating']
+    .forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  document.getElementById('epList').innerHTML = '';
+  epCount = 0;
+  addEpRow();
+  document.getElementById('thumbPreviewBox').style.display = 'none';
+  document.getElementById('alertBox').style.display = 'none';
+}
+
+// ── Submit Anime ─────────────────────────────
+async function submitAnime() {
+  const title = document.getElementById('f-title').value.trim();
+  const thumb = document.getElementById('f-thumb').value.trim();
+
+  if (!title) { showAlert('❌ Judul wajib diisi!', 'error'); return; }
+  if (!thumb) { showAlert('❌ URL Cover wajib diisi!', 'error'); return; }
+
+  const episodes = getEpisodes();
+  if (!episodes.length) { showAlert('❌ Tambahkan minimal 1 episode dengan URL video!', 'error'); return; }
+
+  const btn = document.getElementById('saveBtn');
+  btn.textContent = '⏳ Menyimpan...';
+  btn.disabled = true;
+
+  const genres = document.getElementById('f-genres').value.split(',').map(g => g.trim()).filter(Boolean);
+  const slug = 'custom-' + title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+/g, '-');
+
+  const anime = {
+    id: Date.now(),
+    title, slug, thumb,
+    synopsis: document.getElementById('f-synopsis').value.trim() || 'Tidak ada sinopsis.',
+    status: document.getElementById('f-status').value,
+    type: document.getElementById('f-type').value,
+    rating: document.getElementById('f-rating').value || null,
+    studio: document.getElementById('f-studio').value.trim() || null,
+    aired: document.getElementById('f-aired').value.trim() || null,
+    duration: document.getElementById('f-duration').value.trim() || null,
+    genres, episodes,
+    episode: String(episodes.length),
+    isCustom: true,
+    uploadedAt: new Date().toISOString()
+  };
+
+  try {
+    const data = await jbGet();
+    data.animes.push(anime);
+    await jbSet(data);
+    showAlert(`✅ "${title}" berhasil disimpan! (${episodes.length} episode)`, 'success');
+    clearForm();
+  } catch(e) {
+    showAlert(`❌ Gagal menyimpan: ${e.message}`, 'error');
+  }
+
+  btn.textContent = '💾 Simpan Anime';
+  btn.disabled = false;
+}
+
+// ── Daftar Anime ──────────────────────────────
+async function loadAnimeList() {
+  const c = document.getElementById('animeListContainer');
+  c.innerHTML = '<div class="empty">⏳ Memuat...</div>';
+  try {
+    const data = await jbGet();
+    const animes = data.animes || [];
+    if (!animes.length) {
+      c.innerHTML = '<div class="empty">Belum ada anime yang diupload.</div>';
+      return;
+    }
+    c.innerHTML = `<div class="anime-list">${animes.map(a => `
+      <div class="anime-item">
+        <img src="${a.thumb}" onerror="this.src='https://placehold.co/44x60/13131f/7c5cfc?text=?'">
+        <div class="anime-item-info">
+          <div class="anime-item-title">${a.title}</div>
+          <div class="anime-item-meta">
+            <span class="badge ${a.status==='Ongoing'?'badge-ongoing':'badge-complete'}">${a.status}</span>
+            · ${a.episodes?.length||0} ep
+            ${a.rating ? `· ★ ${a.rating}` : ''}
+          </div>
+        </div>
+        <button style="background:var(--danger);border:none;color:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px;flex-shrink:0" onclick="deleteAnime(${a.id})">🗑️</button>
+      </div>
+    `).join('')}</div>`;
+  } catch(e) {
+    c.innerHTML = `<div class="empty" style="color:var(--danger)">❌ ${e.message}<br><br>Coba klik <strong>Test Koneksi</strong> di tab ⚙️ Setup.</div>`;
+  }
+}
+
+async function deleteAnime(id) {
+  if (!confirm('Hapus anime ini?')) return;
+  try {
+    const data = await jbGet();
+    data.animes = data.animes.filter(a => a.id !== id);
+    await jbSet(data);
+    showAlert('✅ Anime dihapus.', 'success');
+    loadAnimeList();
+  } catch(e) {
+    showAlert('❌ Gagal hapus: ' + e.message, 'error');
+  }
+}
+
+// ── Setup ─────────────────────────────────────
+function saveAndTest() {
+  const binId = document.getElementById('cfg-binid').value.trim();
+  const apiKey = document.getElementById('cfg-apikey').value.trim();
+  if (!binId || !apiKey) { showAlert('❌ Isi Bin ID dan API Key dulu!', 'error'); return; }
+  localStorage.setItem('jb_bin_id', binId);
+  localStorage.setItem('jb_api_key', apiKey);
+  localStorage.removeItem('kitsune_conn_ok');
+  testConnection();
+}
+
+function saveTelegram() {
+  const token = document.getElementById('cfg-tg-token').value.trim();
+  const chat  = document.getElementById('cfg-tg-chat').value.trim();
+  if (!token || !chat) { showAlert('❌ Isi Bot Token dan Chat ID!', 'error'); return; }
+  localStorage.setItem('kitsune_tg_token', token);
+  localStorage.setItem('kitsune_tg_chat', chat);
+  showAlert('✅ Config Telegram tersimpan! Coba login di profile.html untuk test.', 'success');
+}
+
+function savePassword() {
+  const pw = document.getElementById('cfg-password').value.trim();
+  if (!pw || pw.length < 4) { showAlert('❌ Password minimal 4 karakter!', 'error'); return; }
+  localStorage.setItem('kitsune_admin_pw', pw);
+  showAlert('✅ Password berhasil diubah!', 'success');
+  document.getElementById('cfg-password').value = '';
+}
+
+// ── Cache ─────────────────────────────────────
+async function clearCache() {
+  try {
+    const r = await fetch(`${RAILWAY_API}/cache/clear`);
+    const d = await r.json();
+    const el = document.getElementById('cacheStatus');
+    el.textContent = d.message;
+    setTimeout(() => el.textContent = '', 3000);
+  } catch(e) {}
+}
+
+// ── Alert ─────────────────────────────────────
+function showAlert(msg, type) {
+  const box = document.getElementById('alertBox');
+  box.className = `alert alert-${type}`;
+  box.textContent = msg;
+  box.style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  setTimeout(() => box.style.display = 'none', 6000);
+}
+
+// ── Init ──────────────────────────────────────
+if (sessionStorage.getItem('kitsune_auth') === '1') {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('adminScreen').style.display = 'block';
+  addEpRow();
+  // Isi form setup dengan nilai tersimpan
+  const savedBin = localStorage.getItem('jb_bin_id');
+  const savedKey = localStorage.getItem('jb_api_key');
+  if (savedBin) document.getElementById('cfg-binid').value = savedBin;
+  if (savedKey) document.getElementById('cfg-apikey').value = savedKey;
+  const savedTgToken = localStorage.getItem('kitsune_tg_token');
+  const savedTgChat  = localStorage.getItem('kitsune_tg_chat');
+  if (savedTgToken) document.getElementById('cfg-tg-token').value = savedTgToken;
+  if (savedTgChat)  document.getElementById('cfg-tg-chat').value  = savedTgChat;
+  if (!savedBin || !savedKey || !localStorage.getItem('kitsune_conn_ok')) {
+    document.getElementById('connWarning').style.display = 'block';
+  }
+}
+
+// ── Pengumuman ────────────────────────────────
+const ANN_KEY = 'kitsune_announcement';
+
+function saveAnnouncement() {
+  const msg  = document.getElementById('ann-msg').value.trim();
+  const type = document.getElementById('ann-type').value;
+  if (!msg) { clearAnnouncement(); return; }
+  const ann = { msg, type, updatedAt: new Date().toLocaleString('id-ID') };
+  localStorage.setItem(ANN_KEY, JSON.stringify(ann));
+  showAnnouncementPreview(ann);
+  showAlert('✅ Pengumuman tersimpan dan tampil di Home!', 'success');
+}
+
+function clearAnnouncement() {
+  localStorage.removeItem(ANN_KEY);
+  document.getElementById('ann-msg').value = '';
+  document.getElementById('ann-preview').style.display = 'none';
+  showAlert('🗑️ Pengumuman dihapus.', 'success');
+}
+
+function showAnnouncementPreview(ann) {
+  const colors = { info:'#3b82f6', warning:'#f59e0b', success:'#10b981', danger:'#ef4444' };
+  const preview = document.getElementById('ann-preview');
+  preview.style.display = 'block';
+  preview.innerHTML = `
+    <div style="padding:12px 16px;border-radius:10px;border-left:4px solid ${colors[ann.type]||'#3b82f6'};background:var(--bg);font-size:13px">
+      <strong>Preview:</strong><br>${ann.msg}
+      <div style="font-size:11px;color:var(--text2);margin-top:4px">Tersimpan: ${ann.updatedAt}</div>
+    </div>`;
+}
+
+function loadAnnouncementTab() {
+  const raw = localStorage.getItem(ANN_KEY);
+  if (!raw) return;
+  try {
+    const ann = JSON.parse(raw);
+    document.getElementById('ann-msg').value  = ann.msg || '';
+    document.getElementById('ann-type').value = ann.type || 'info';
+    showAnnouncementPreview(ann);
+  } catch(e) {}
+}
+
+</script>
+</body>
+  </html>
