@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Random — KitsuneID</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    /* TABS */
+    .rtabs{display:flex;gap:4px;background:var(--card);padding:4px;border-radius:14px;margin-bottom:20px;border:1px solid var(--border)}
+    .rtab{flex:1;padding:10px 6px;text-align:center;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;color:var(--text2);border:none;background:none;transition:all .2s}
+    .rtab.active{background:var(--accent);color:#fff}
+
+    /* RANDOM WRAP */
+    .random-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:55vh;padding:4px;text-align:center;gap:20px}
+    .rcard{width:160px;border-radius:var(--rl);overflow:hidden;border:1px solid var(--border);background:var(--card);box-shadow:0 16px 40px rgba(0,0,0,.5);transition:all .4s}
+    .rcard img{width:100%;aspect-ratio:3/4;object-fit:cover;background:var(--card)}
+    .rcard-info{padding:10px}
+    .rcard-title{font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;margin-bottom:3px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+    .rcard-meta{font-size:11px;color:var(--text2)}
+    @keyframes spinIn{from{transform:rotateY(90deg) scale(.8);opacity:0}to{transform:rotateY(0) scale(1);opacity:1}}
+    .spin{animation:spinIn .5s cubic-bezier(.34,1.56,.64,1)}
+    .btn-random{display:inline-flex;align-items:center;gap:8px;padding:14px 32px;background:var(--accent);border-radius:12px;font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;color:#fff;cursor:pointer;border:none;transition:all .2s;box-shadow:0 4px 20px var(--accent-g)}
+    .btn-random:hover{transform:translateY(-2px) scale(1.02)}
+    .btn-random:active{transform:scale(.97)}
+    .ractions{display:none;flex-direction:column;gap:10px;align-items:center}
+
+    /* SPECIAL TAB */
+    .special-wrap{padding:4px}
+    .special-empty{text-align:center;padding:40px 20px;color:var(--text2);font-size:13px;line-height:1.8}
+    .special-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .sp-card{border-radius:var(--rl);overflow:hidden;border:1px solid var(--border);background:var(--card);cursor:pointer;transition:all .2s;text-decoration:none;display:block}
+    .sp-card:active{transform:scale(.96)}
+    .sp-card img{width:100%;aspect-ratio:3/4;object-fit:cover;background:var(--card)}
+    .sp-card-info{padding:8px}
+    .sp-card-title{font-size:11px;font-weight:700;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.4;color:var(--text)}
+    .sp-card-meta{font-size:10px;color:var(--text2);margin-top:2px}
+    .badge-special{display:inline-block;padding:1px 6px;background:rgba(124,92,252,.2);color:var(--accent);border-radius:20px;font-size:9px;font-weight:700;margin-bottom:4px}
+    .sp-loading{text-align:center;padding:30px;color:var(--text2);font-size:13px}
+  </style>
+</head>
+<body>
+<nav class="navbar"><a href="index.html" class="logo"></a></nav>
+<div class="page mobile-page">
+  <div class="page-hd anim"><h1>Random Anime</h1><p>Bingung mau nonton apa?</p></div>
+
+  <!-- TABS -->
+  <div class="rtabs">
+    <button class="rtab active" onclick="switchRTab('random')">🎲 Random</button>
+    <button class="rtab" onclick="switchRTab('special')">⭐ Special</button>
+  </div>
+
+  <!-- TAB RANDOM -->
+  <div id="rtab-random">
+    <div class="random-wrap">
+      <div id="rPlaceholder" style="width:160px;height:213px;border-radius:var(--rl);background:var(--card);border:2px dashed var(--border);display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px">Tekan tombol</div>
+      <div class="rcard anim anim-d1" id="rcard" style="display:none">
+        <img id="rThumb" src="" alt="" onerror="this.src='https://placehold.co/160x213/13131f/7c5cfc?text=?'">
+        <div class="rcard-info">
+          <div class="rcard-title" id="rTitle"></div>
+          <div class="rcard-meta" id="rMeta"></div>
+        </div>
+      </div>
+      <button class="btn-random" onclick="pickRandom()">🎲 Pilihkan Anime!</button>
+      <div class="ractions" id="rActions">
+        <a href="#" class="btn-p" id="rWatch">▶ Nonton Sekarang</a>
+        <a href="#" class="btn-s" id="rDetail" style="font-size:13px">Lihat Detail</a>
+      </div>
+      <p id="rHint" style="display:none;font-size:12px;color:var(--muted)">Tidak cocok? Tekan lagi!</p>
+    </div>
+  </div>
+
+  <!-- TAB SPECIAL -->
+  <div id="rtab-special" style="display:none">
+    <div class="special-wrap">
+      <div id="specialContainer" class="sp-loading">⏳ Memuat...</div>
+    </div>
+  </div>
+
+  <div style="height:24px"></div>
+</div>
+
+<nav class="bnav"><div class="bnav-items">
+  <a href="index.html" class="bnav-item"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" fill="currentColor"/></svg><span>Home</span></a>
+  <a href="jadwal.html" class="bnav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Jadwal</span></a>
+  <a href="random.html" class="bnav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg><span>Random</span></a>
+  <a href="history.html" class="bnav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>Riwayat</span></a>
+  <a href="saved.html" class="bnav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg><span>Simpan</span></a>
+  <a href="profile.html" class="bnav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Akun</span></a>
+</div></nav>
+
+<div class="toasts" id="toasts"></div>
+<script src="js/main.js"></script>
+<script>
+const API = 'https://kitsuneid-api-production.up.railway.app';
+const JSONBIN_ID = '699c6ab843b1c97be996c684';
+// Ambil API key dari localStorage (diisi lewat admin setup)
+function getJbKey() { return localStorage.getItem('jb_api_key') || '$2a$10$Tzk5re.vhAxioVkFJhrqfu2IiXGZB0HVNlm23UZ4scO59NGpa9N4'; }
+
+let pool = [];
+let specialLoaded = false;
+
+// ── Tabs ─────────────────────────────────────
+function switchRTab(name) {
+  document.getElementById('rtab-random').style.display = name === 'random' ? 'block' : 'none';
+  document.getElementById('rtab-special').style.display = name === 'special' ? 'block' : 'none';
+  document.querySelectorAll('.rtab').forEach((b, i) =>
+    b.classList.toggle('active', ['random','special'][i] === name));
+  if (name === 'special' && !specialLoaded) {
+    specialLoaded = true;
+    loadSpecial();
+  }
+}
+
+// ── Random Tab ────────────────────────────────
+async function loadPool() {
+  try {
+    const ctrl = new AbortController();
+    setTimeout(() => ctrl.abort(), 15000);
+    const [r1, r2] = await Promise.all([
+      fetch(`${API}/ongoing`,  { signal: ctrl.signal }),
+      fetch(`${API}/complete`, { signal: ctrl.signal })
+    ]);
+    const [d1, d2] = await Promise.all([r1.json(), r2.json()]);
+    pool = [...(d1.animes || []), ...(d2.animes || [])];
+    console.log('Pool loaded:', pool.length, 'anime');
+  } catch(e) {
+    console.error('Pool error:', e.message);
+  }
+}
+
+async function pickRandom() {
+  if (!pool.length) {
+    const btn = document.querySelector('.btn-random');
+    if (btn) btn.textContent = '⏳ Memuat...';
+    await loadPool();
+    if (btn) btn.textContent = '🎲 Pilihkan Anime!';
+  }
+  if (!pool.length) {
+    alert('Gagal memuat data. Coba refresh halaman!');
+    return;
+  }
+  const a = pool[Math.floor(Math.random() * pool.length)];
+  const card = document.getElementById('rcard');
+  const thumb = document.getElementById('rThumb');
+  thumb.src = a.thumb || '';
+  thumb.onerror = () => { thumb.src = 'https://placehold.co/160x213/13131f/7c5cfc?text=?'; };
+  document.getElementById('rTitle').textContent = a.title || 'Anime';
+  document.getElementById('rMeta').textContent = `${a.status || ''} ${a.rating ? '· ★ ' + a.rating : ''}`.trim();
+  const sl = encodeURIComponent(a.slug || '');
+  document.getElementById('rWatch').href = `watch.html?slug=${sl}&ep=1`;
+  document.getElementById('rDetail').href = `watch.html?slug=${sl}&ep=1`;
+  document.getElementById('rPlaceholder').style.display = 'none';
+  card.style.display = 'block';
+  card.classList.remove('spin'); void card.offsetWidth; card.classList.add('spin');
+  document.getElementById('rActions').style.display = 'flex';
+  document.getElementById('rHint').style.display = 'block';
+}
+
+// ── Special Tab ───────────────────────────────
+async function loadSpecial() {
+  const c = document.getElementById('specialContainer');
+  c.className = 'sp-loading';
+  c.textContent = '⏳ Memuat anime special...';
+  try {
+    const r = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_ID}/latest`, {
+      headers: { 'X-Master-Key': getJbKey() }
+    });
+    if (!r.ok) throw new Error('Gagal mengambil data');
+    const d = await r.json();
+    const record = d.record ?? d;
+    const animes = record.animes || [];
+
+    if (!animes.length) {
+      c.className = '';
+      c.innerHTML = `
+        <div class="special-empty">
+          <div style="font-size:40px;margin-bottom:12px">⭐</div>
+          <div style="font-weight:700;font-size:15px;color:var(--text);margin-bottom:8px">Belum ada anime special</div>
+          <div>Admin belum mengupload anime apapun.</div>
+        </div>`;
+      return;
+    }
+
+    c.className = '';
+    c.innerHTML = `
+      <div style="margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:13px;color:var(--text2)">${animes.length} anime tersedia</div>
+        <span class="badge-special">⭐ SPECIAL</span>
+      </div>
+      <div class="special-grid">
+        ${animes.map(a => {
+          const sl = encodeURIComponent(a.slug || '');
+          const thumb = a.thumb || '';
+          return `
+            <a href="watch.html?slug=${sl}&ep=1" class="sp-card">
+              <img src="${thumb}"
+                onerror="this.src='https://placehold.co/160x213/13131f/7c5cfc?text=?'"
+                loading="lazy">
+              <div class="sp-card-info">
+                <div class="badge-special">⭐ Special</div>
+                <div class="sp-card-title">${a.title || ''}</div>
+                <div class="sp-card-meta">${a.status || ''} · ${a.episodes?.length || 0} ep</div>
+              </div>
+            </a>`;
+        }).join('')}
+      </div>`;
+  } catch(e) {
+    c.className = '';
+    c.innerHTML = `<div class="special-empty" style="color:var(--danger)">❌ Gagal memuat: ${e.message}</div>`;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', loadPool);
+</script>
+</body>
+</html>
