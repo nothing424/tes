@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>On Going — KitsuneID</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<nav class="navbar">
+  <a href="index.html" class="logo"></a>
+  <div class="nav-actions" style="margin-left:auto"><a href="profile.html" class="btn-login">Masuk</a></div>
+</nav>
+<div class="page mobile-page">
+  <div class="page-hd anim"><h1>Anime On Going</h1><p>Anime yang sedang tayang</p></div>
+  <div class="sec anim anim-d1">
+    <div class="anime-grid" id="ongoingGrid">
+      <div class="sk-card"><div class="sk sk-thumb"></div><div class="sk sk-txt"></div><div class="sk sk-txt2"></div></div>
+      <div class="sk-card"><div class="sk sk-thumb"></div><div class="sk sk-txt"></div><div class="sk sk-txt2"></div></div>
+      <div class="sk-card"><div class="sk sk-thumb"></div><div class="sk sk-txt"></div><div class="sk sk-txt2"></div></div>
+      <div class="sk-card"><div class="sk sk-thumb"></div><div class="sk sk-txt"></div><div class="sk sk-txt2"></div></div>
+      <div class="sk-card"><div class="sk sk-thumb"></div><div class="sk sk-txt"></div><div class="sk sk-txt2"></div></div>
+      <div class="sk-card"><div class="sk sk-thumb"></div><div class="sk sk-txt"></div><div class="sk sk-txt2"></div></div>
+      <div class="sk-card"><div class="sk sk-thumb"></div><div class="sk sk-txt"></div><div class="sk sk-txt2"></div></div>
+      <div class="sk-card"><div class="sk sk-thumb"></div><div class="sk sk-txt"></div><div class="sk sk-txt2"></div></div>
+      <div class="sk-card"><div class="sk sk-thumb"></div><div class="sk sk-txt"></div><div class="sk sk-txt2"></div></div>
+      <div class="sk-card"><div class="sk sk-thumb"></div><div class="sk sk-txt"></div><div class="sk sk-txt2"></div></div>
+      <div class="sk-card"><div class="sk sk-thumb"></div><div class="sk sk-txt"></div><div class="sk sk-txt2"></div></div>
+      <div class="sk-card"><div class="sk sk-thumb"></div><div class="sk sk-txt"></div><div class="sk sk-txt2"></div></div>
+    </div>
+    <div style="display:flex;justify-content:center;margin-top:20px">
+      <button id="loadMoreBtn" class="btn-s" onclick="loadMore()" style="display:none">Muat Lebih Banyak</button>
+    </div>
+  </div>
+  <div style="height:24px"></div>
+</div>
+<nav class="bnav"><div class="bnav-items">
+  <a href="index.html" class="bnav-item active"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" fill="currentColor"/></svg><span>Home</span></a>
+  <a href="jadwal.html" class="bnav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Jadwal</span></a>
+  <a href="random.html" class="bnav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg><span>Random</span></a>
+  <a href="history.html" class="bnav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>Riwayat</span></a>
+  <a href="saved.html" class="bnav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg><span>Simpan</span></a>
+  <a href="profile.html" class="bnav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Akun</span></a>
+</div></nav>
+<div class="toasts" id="toasts"></div>
+<script src="js/main.js"></script>
+<script>
+let page = 1, loading = false;
+async function loadMore() {
+  if (loading) return; loading = true;
+  const btn = document.getElementById('loadMoreBtn');
+  if (btn) btn.textContent = 'Memuat...';
+  try {
+    const r = await fetch(`/api/ongoing?page=${page}`);
+    const d = await r.json();
+    if (!d.animes?.length) { if(btn) btn.style.display='none'; return; }
+    const grid = document.getElementById('ongoingGrid');
+    if (page === 1) grid.innerHTML = '';
+    grid.innerHTML += d.animes.map(a => makeCard(a, true)).join('');
+    page++;
+    if (btn) { btn.style.display='flex'; btn.textContent='Muat Lebih Banyak'; }
+  } catch(e) { if(btn) btn.textContent='Gagal, coba lagi'; }
+  loading = false;
+}
+document.addEventListener('DOMContentLoaded', loadMore);
+</script>
+</body>
+</html>
