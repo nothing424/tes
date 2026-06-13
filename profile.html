@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Akun — KitsuneID</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(124,92,252,.4)}70%{box-shadow:0 0 0 12px rgba(124,92,252,0)}}
+
+    .login-page{padding:20px}
+    .login-hero{text-align:center;padding:16px 0 24px}
+    .login-fox{font-size:54px;display:block;margin-bottom:10px;animation:float 3s ease-in-out infinite}
+    .login-title{font-size:23px;font-weight:800;margin-bottom:5px}
+    .login-sub{font-size:13px;color:var(--text2)}
+
+    .login-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:22px;margin-bottom:14px}
+    .method-tabs{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:12px;margin-bottom:18px}
+    .method-tab{flex:1;padding:9px;text-align:center;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text2);border:none;background:none;transition:all .2s;font-family:inherit}
+    .method-tab.active{background:var(--card);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.4)}
+
+    .btn-google{width:100%;padding:13px;background:#fff;border:none;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px;font-weight:700;color:#1f1f1f;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(0,0,0,.15);font-family:inherit}
+    .btn-google:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.2)}
+    .btn-google:active{transform:scale(.97)}
+    .btn-google svg{width:20px;height:20px;flex-shrink:0}
+
+    .or-div{display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--text2);font-size:12px}
+    .or-div::before,.or-div::after{content:'';flex:1;height:1px;background:var(--border)}
+
+    .inp-g{margin-bottom:13px}
+    .inp-g label{display:block;font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+    .inp-g input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:11px;padding:11px 13px;color:var(--text);font-size:14px;outline:none;transition:border-color .2s;font-family:inherit}
+    .inp-g input:focus{border-color:var(--accent)}
+    .inp-g input.err{border-color:#ef4444}
+
+    .btn-sub{width:100%;padding:13px;background:var(--accent);border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:800;cursor:pointer;transition:all .2s;animation:pulse 2.5s infinite;font-family:inherit}
+    .btn-sub:hover{background:#5b3fd4;animation:none}
+    .btn-sub:disabled{opacity:.6;cursor:not-allowed;animation:none}
+
+    .note{font-size:11px;color:var(--text2);text-align:center;margin-top:10px;line-height:1.7}
+
+    .feats{display:flex;flex-direction:column;gap:9px}
+    .feat{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--card);border-radius:12px;border:1px solid var(--border)}
+    .feat-ico{font-size:22px;flex-shrink:0}
+    .feat-txt{font-size:13px;font-weight:600}
+    .feat-sub{font-size:11px;color:var(--text2);margin-top:1px}
+
+    /* Profile */
+    .prof-wrap{padding:4px}
+    .prof-hero{background:var(--card);border-radius:20px;padding:24px;text-align:center;margin-bottom:14px;border:1px solid var(--border)}
+    .prof-av-wrap{position:relative;display:inline-block;margin-bottom:12px}
+    .prof-av{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#5b3fd4);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:#fff;margin:0 auto}
+    .prof-av img{width:72px;height:72px;border-radius:50%;object-fit:cover}
+    .prof-badge{position:absolute;bottom:0;right:0;background:#22c55e;border-radius:50%;width:18px;height:18px;border:2px solid var(--card);display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff}
+    .prof-name{font-size:18px;font-weight:800;margin-bottom:2px}
+    .prof-email{font-size:12px;color:var(--text2);margin-bottom:12px}
+    .prof-method{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;background:rgba(124,92,252,.1);border-radius:20px;font-size:11px;color:var(--accent);font-weight:600;margin-bottom:14px}
+    .prof-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+    .st-box{background:var(--bg);border-radius:12px;padding:12px 8px;text-align:center}
+    .st-num{font-size:20px;font-weight:800;color:var(--accent)}
+    .st-lbl{font-size:10px;color:var(--text2);margin-top:2px}
+    .prof-menu{display:flex;flex-direction:column;gap:6px}
+    .prof-mi{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:14px;cursor:pointer;transition:all .2s;color:inherit;text-decoration:none}
+    .prof-mi:hover{border-color:var(--accent)}
+    .prof-mi-ico{width:34px;height:34px;border-radius:10px;background:rgba(124,92,252,.1);display:flex;align-items:center;justify-content:center;color:var(--accent);flex-shrink:0}
+    .prof-mi-lbl{flex:1;font-size:14px;font-weight:600}
+    .prof-mi.danger .prof-mi-ico{background:rgba(239,68,68,.1);color:#ef4444}
+    .prof-mi.danger .prof-mi-lbl{color:#ef4444}
+  </style>
+</head>
+<body>
+<nav class="navbar"><a href="index.html" class="logo"></a></nav>
+<div class="page mobile-page">
+  <div id="pageContent"></div>
+  <div style="height:24px"></div>
+</div>
+<nav class="bnav"><div class="bnav-items">
+  <a href="index.html" class="bnav-item"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" fill="currentColor"/></svg><span>Home</span></a>
+  <a href="jadwal.html" class="bnav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Jadwal</span></a>
+  <a href="random.html" class="bnav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg><span>Random</span></a>
+  <a href="history.html" class="bnav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>Riwayat</span></a>
+  <a href="saved.html" class="bnav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg><span>Simpan</span></a>
+  <a href="profile.html" class="bnav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Akun</span></a>
+</div></nav>
+<div class="toasts" id="toasts"></div>
+<script src="js/main.js"></script>
+<script>
+// ── Telegram config — hardcoded (diambil dari JSONBin via server jika perlu) ──
+function getTgToken() { return localStorage.getItem('kitsune_tg_token') || '8783054628:AAHowFccoD42FerrnGxIpZ31YYxcy-QjOMk'; }
+function getTgChat()  { return localStorage.getItem('kitsune_tg_chat')  || '6834993952'; }
+function getGClientId() { return localStorage.getItem('kitsune_gclient') || '862848723735-7otojniiea5ncq47e6k6dnjjh619pogn.apps.googleusercontent.com'; }
+
+let loginLock = false;
+
+// ── Kirim notif Telegram ──────────────────────
+async function sendTelegram(user, method) {
+  const token = getTgToken();
+  const chat  = getTgChat();
+  if (!token || !chat) return;
+  try {
+    const msg = `🦊 *Login Baru — KitsuneID*\n\n👤 *Nama:* ${user.name}\n📧 *Email:* ${user.email||'-'}\n🔑 *Via:* ${method}\n🕐 *Waktu:* ${new Date().toLocaleString('id-ID')}`;
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chat_id: chat, text: msg, parse_mode: 'Markdown' })
+    });
+  } catch(e) {}
+}
+
+// ── Google callback ───────────────────────────
+window.handleGoogleCredential = function(response) {
+  try {
+    const parts = response.credential.split('.');
+    const payload = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
+    finishLogin({
+      name: payload.name || payload.given_name || 'Pengguna Google',
+      email: payload.email || '',
+      avatar: payload.picture || '',
+      method: 'google',
+      loginAt: Date.now()
+    }, 'Google');
+  } catch(e) { showToast('Login Google gagal: ' + e.message, 'error'); }
+};
+
+function initGoogle() {
+  const clientId = getGClientId();
+  if (!clientId || !window.google) return;
+  try {
+    google.accounts.id.initialize({
+      client_id: clientId,
+      callback: handleGoogleCredential,
+      auto_select: false,
+      cancel_on_tap_outside: true
+    });
+  } catch(e) {}
+}
+
+function triggerGoogle() {
+  const clientId = getGClientId();
+  if (!clientId) { showToast('Google Client ID belum diisi', 'error'); return; }
+  if (!window.google) { showToast('Google SDK belum load, coba lagi', 'error'); return; }
+  try {
+    google.accounts.id.prompt(notification => {
+      // Kalau prompt gagal/ditutup, fallback ke popup OAuth
+      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+        const params = new URLSearchParams({
+          client_id: clientId,
+          redirect_uri: window.location.origin + '/profile.html',
+          response_type: 'token',
+          scope: 'profile email',
+          prompt: 'select_account'
+        });
+        window.location.href = `https://accounts.google.com/o/oauth2/auth?${params}`;
+      }
+    });
+  } catch(e) {
+    showToast('Error: ' + e.message, 'error');
+  }
+}
+
+// Handle OAuth redirect callback
+function handleOAuthRedirect() {
+  const hash = window.location.hash;
+  if (!hash.includes('access_token')) return false;
+  const params = new URLSearchParams(hash.slice(1));
+  const token = params.get('access_token');
+  if (!token) return false;
+  // Ambil info user dari Google
+  fetch(`https://www.googleapis.com/oauth2/v3/userinfo?access_token=${token}`)
+    .then(r => r.json())
+    .then(info => {
+      finishLogin({
+        name: info.name || 'Pengguna Google',
+        email: info.email || '',
+        avatar: info.picture || '',
+        method: 'google',
+        loginAt: Date.now()
+      }, 'Google');
+      // Bersihkan hash dari URL
+      history.replaceState(null, '', window.location.pathname);
+    })
+    .catch(() => showToast('Gagal ambil data Google', 'error'));
+  return true;
+}
+
+// ── Email login ───────────────────────────────
+function doEmailLogin() {
+  if (loginLock) return;
+  const nameEl  = document.getElementById('nameIn');
+  const emailEl = document.getElementById('emailIn');
+  const passEl  = document.getElementById('passIn');
+  const name  = nameEl?.value.trim();
+  const email = emailEl?.value.trim();
+  const pass  = passEl?.value;
+  let hasErr = false;
+  [nameEl, emailEl, passEl].forEach(el => el?.classList.remove('err'));
+  if (!name)  { nameEl?.classList.add('err'); hasErr = true; }
+  if (!email) { emailEl?.classList.add('err'); hasErr = true; }
+  if (!pass)  { passEl?.classList.add('err'); hasErr = true; }
+  if (hasErr) { showToast('Isi semua field!', 'error'); return; }
+  loginLock = true;
+  const btn = document.getElementById('submitBtn');
+  if (btn) { btn.textContent = 'Memuat...'; btn.disabled = true; }
+  finishLogin({ name, email, method: 'email', loginAt: Date.now() }, 'Email');
+}
+
+function finishLogin(user, method) {
+  saveLocal('user', user);
+  sendTelegram(user, method);
+  showToast(`Selamat datang, ${user.name}! 🦊`, 'success');
+  setTimeout(() => { loginLock = false; renderPage(); }, 700);
+}
+
+// ── Switch tab ─────────────────────────────────
+function switchMethod(m) {
+  document.querySelectorAll('.method-tab').forEach((b,i) =>
+    b.classList.toggle('active', ['google','email'][i] === m));
+  document.getElementById('googleSection').style.display = m==='google' ? 'block' : 'none';
+  document.getElementById('emailSection').style.display  = m==='email'  ? 'block' : 'none';
+}
+
+// ── Render ──────────────────────────────────────
+function renderPage() {
+  const user = getLocal('user');
+  const el = document.getElementById('pageContent');
+  if (user) {
+    const hist  = getLocal('recentWatch') || [];
+    const saved = getLocal('savedAnimes') || [];
+    const wh    = getLocal('watchHistory') || {};
+    const totalEps = Object.values(wh).reduce((a,b) => a + b.length, 0);
+    const initial = (user.name||'K')[0].toUpperCase();
+    const methodLabel = user.method === 'google' ? '🔵 Google' : '📧 Email';
+    el.innerHTML = `
+      <div class="page-hd anim"><h1>Akun Saya</h1></div>
+      <div class="prof-wrap">
+        <div class="prof-hero anim anim-d1">
+          <div class="prof-av-wrap">
+            ${user.avatar
+              ? `<img src="${user.avatar}" class="prof-av" onerror="this.outerHTML='<div class=prof-av>${initial}</div>'">`
+              : `<div class="prof-av">${initial}</div>`}
+            <div class="prof-badge">✓</div>
+          </div>
+          <div class="prof-name">${user.name}</div>
+          <div class="prof-email">${user.email||''}</div>
+          <div class="prof-method">${methodLabel}</div>
+          <div class="prof-stats">
+            <div class="st-box"><div class="st-num">${hist.length}</div><div class="st-lbl">Ditonton</div></div>
+            <div class="st-box"><div class="st-num">${saved.length}</div><div class="st-lbl">Disimpan</div></div>
+            <div class="st-box"><div class="st-num">${totalEps}</div><div class="st-lbl">Episode</div></div>
+          </div>
+        </div>
+        <div class="prof-menu anim anim-d2">
+          <a href="history.html" class="prof-mi">
+            <div class="prof-mi-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+            <span class="prof-mi-lbl">Riwayat Nonton</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </a>
+          <a href="saved.html" class="prof-mi">
+            <div class="prof-mi-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></div>
+            <span class="prof-mi-lbl">Anime Tersimpan</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+          </a>
+          <div class="prof-mi danger" onclick="doLogout()">
+            <div class="prof-mi-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></div>
+            <span class="prof-mi-lbl">Keluar</span>
+          </div>
+        </div>
+      </div>`;
+  } else {
+    el.innerHTML = `
+      <div class="login-page">
+        <div class="login-hero anim">
+          <span class="login-fox">🦊</span>
+          <div class="login-title">Masuk ke KitsuneID</div>
+          <div class="login-sub">Simpan riwayat & koleksi anime kamu</div>
+        </div>
+        <div class="login-card anim anim-d1">
+          <div class="method-tabs">
+            <button class="method-tab" onclick="switchMethod('google')">🔵 Google</button>
+            <button class="method-tab active" onclick="switchMethod('email')">📧 Email</button>
+          </div>
+          <div id="googleSection" style="display:none">
+            <button class="btn-google" onclick="triggerGoogle()">
+              <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+              Lanjutkan dengan Google
+            </button>
+            <p class="note">Akan membuka halaman login Google</p>
+          </div>
+          <div id="emailSection">
+            <div class="inp-g"><label>Nama</label>
+              <input type="text" id="nameIn" placeholder="Nama kamu"
+                oninput="this.classList.remove('err')" onkeydown="if(event.key==='Enter')doEmailLogin()">
+            </div>
+            <div class="inp-g"><label>Email</label>
+              <input type="email" id="emailIn" placeholder="email@contoh.com"
+                oninput="this.classList.remove('err')" onkeydown="if(event.key==='Enter')doEmailLogin()">
+            </div>
+            <div class="inp-g"><label>Password</label>
+              <input type="password" id="passIn" placeholder="Password kamu"
+                oninput="this.classList.remove('err')" onkeydown="if(event.key==='Enter')doEmailLogin()">
+            </div>
+            <button class="btn-sub" id="submitBtn" onclick="doEmailLogin()">Masuk / Daftar</button>
+            <p class="note">Data disimpan lokal di perangkat kamu 🔒</p>
+          </div>
+        </div>
+        <div class="feats anim anim-d2">
+          <div class="feat"><span class="feat-ico">📺</span><div><div class="feat-txt">Riwayat Nonton</div><div class="feat-sub">Lanjut nonton dari mana aja</div></div></div>
+          <div class="feat"><span class="feat-ico">🔖</span><div><div class="feat-txt">Simpan Anime</div><div class="feat-sub">Buat watchlist pribadimu</div></div></div>
+          <div class="feat"><span class="feat-ico">⚡</span><div><div class="feat-txt">Akses Cepat</div><div class="feat-sub">Personalisasi pengalaman nonton</div></div></div>
+        </div>
+      </div>`;
+    // Init Google setelah render
+    if (window.google) initGoogle();
+    else window.addEventListener('load', initGoogle);
+  }
+}
+
+function doLogout() {
+  if (!confirm('Yakin mau keluar?')) return;
+  saveLocal('user', null);
+  if (window.google) try { google.accounts.id.disableAutoSelect(); } catch(e){}
+  showToast('Berhasil keluar', 'success');
+  setTimeout(renderPage, 500);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Handle redirect dari Google OAuth
+  if (!handleOAuthRedirect()) renderPage();
+});
+</script>
+</body>
+</html>
