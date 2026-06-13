@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Detail Anime — KitsuneID</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    .detail-hero {
+      position: relative;
+      padding-top: var(--nav-height);
+    }
+
+    .detail-bg {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 320px;
+      background-size: cover;
+      background-position: center;
+      filter: brightness(0.2) blur(20px) saturate(1.5);
+      transform: scale(1.1);
+      z-index: -1;
+    }
+
+    .detail-content {
+      padding: 28px 40px;
+      display: flex;
+      gap: 28px;
+      align-items: flex-start;
+    }
+
+    .detail-poster {
+      width: 180px;
+      flex-shrink: 0;
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+      border: 1px solid var(--border);
+    }
+
+    .detail-poster img {
+      width: 100%;
+      aspect-ratio: 3/4;
+      object-fit: cover;
+    }
+
+    .detail-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .detail-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .badge {
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .badge-ongoing { background: var(--accent-soft); color: var(--accent); border: 1px solid var(--accent); }
+    .badge-complete { background: rgba(34,197,94,0.15); color: #22c55e; border: 1px solid #22c55e; }
+    .badge-type { background: rgba(255,255,255,0.07); color: var(--text-secondary); border: 1px solid var(--border); }
+
+    .detail-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
+    }
+
+    .detail-alt-title {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    .detail-stats {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .stat-value {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .stat-value.rating { color: #fbbf24; }
+
+    .detail-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .btn-save {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-save:hover, .btn-save.saved {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .detail-genres {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .genre-tag {
+      padding: 5px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .genre-tag:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .synopsis-section {
+      padding: 0 40px 24px;
+    }
+
+    .synopsis-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .synopsis-title::before {
+      content: '';
+      display: block;
+      width: 3px;
+      height: 16px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .synopsis-text {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    .synopsis-text.collapsed {
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .synopsis-toggle {
+      color: var(--accent);
+      font-size: 13px;
+      cursor: pointer;
+      margin-top: 8px;
+      display: inline-block;
+    }
+
+    /* Episodes */
+    .episode-section {
+      padding: 0 40px 32px;
+    }
+
+    .episode-section .section-header {
+      margin-bottom: 16px;
+    }
+
+    .episode-filter {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      padding-bottom: 4px;
+    }
+
+    .episode-filter::-webkit-scrollbar { display: none; }
+
+    .filter-btn {
+      padding: 6px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .filter-btn.active {
+      background: var(--accent-soft);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .episode-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .episode-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .episode-item:hover {
+      border-color: var(--accent);
+      background: var(--bg-card-hover);
+    }
+
+    .episode-item.watched {
+      opacity: 0.6;
+    }
+
+    .ep-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
+      min-width: 32px;
+    }
+
+    .ep-info {
+      flex: 1;
+    }
+
+    .ep-title {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .ep-date {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .ep-play {
+      width: 32px;
+      height: 32px;
+      background: var(--accent-soft);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .ep-watched-icon {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 2px solid var(--text-muted);
+      flex-shrink: 0;
+    }
+
+    .ep-watched-icon.done {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .detail-content {
+        padding: 20px 16px;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+
+      .detail-poster {
+        width: 140px;
+      }
+
+      .detail-badges {
+        justify-content: center;
+      }
+
+      .detail-stats {
+        justify-content: center;
+      }
+
+      .detail-actions {
+        justify-content: center;
+      }
+
+      .detail-genres {
+        justify-content: center;
+      }
+
+      .detail-title {
+        font-size: 22px;
+      }
+
+      .synopsis-section, .episode-section {
+        padding-left: 16px;
+        padding-right: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <button onclick="history.back()" style="background:none;border:none;cursor:pointer;color:var(--text-primary);display:flex;align-items:center;gap:6px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    Kembali
+  </button>
+  <a href="index.html" class="navbar-logo" style="margin-left: auto; margin-right: auto; transform: translateX(-30px);">
+    Kitsune<span>ID</span>
+  </a>
+  <div class="navbar-actions">
+    <a href="login.html" class="btn-login">Masuk</a>
+  </div>
+</nav>
+
+<div class="page-wrapper">
+
+  <!-- BG Blur -->
+  <div class="detail-bg" id="detailBg"></div>
+
+  <!-- Detail Content -->
+  <div class="detail-content" id="detailContent">
+    <!-- Loading state -->
+    <div class="detail-poster">
+      <div class="skeleton" style="aspect-ratio:3/4;width:100%;"></div>
+    </div>
+    <div class="detail-info" style="width:100%">
+      <div class="skeleton" style="height:14px;width:80px;border-radius:20px;margin-bottom:12px;"></div>
+      <div class="skeleton" style="height:28px;width:90%;margin-bottom:8px;border-radius:8px;"></div>
+      <div class="skeleton" style="height:14px;width:60%;margin-bottom:16px;border-radius:6px;"></div>
+    </div>
+  </div>
+
+  <!-- Synopsis -->
+  <div class="synopsis-section" id="synopsisSection" style="display:none">
+    <div class="synopsis-title">Sinopsis</div>
+    <p class="synopsis-text collapsed" id="synopsisText"></p>
+    <span class="synopsis-toggle" id="synopsisToggle" onclick="toggleSynopsis()">Baca Selengkapnya ▾</span>
+  </div>
+
+  <!-- Episodes -->
+  <div class="episode-section" id="episodeSection" style="display:none">
+    <div class="section-header">
+      <div class="section-title">Daftar Episode</div>
+      <div style="font-size:12px;color:var(--text-muted)" id="epCount"></div>
+    </div>
+    <div class="episode-filter" id="episodeFilter"></div>
+    <div class="episode-list" id="episodeList">
+      <p style="color:var(--text-muted);font-size:13px">Memuat episode...</p>
+    </div>
+  </div>
+
+  <div style="height:24px;"></div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bnav">
+  <div class="bnav-items">
+    <a href="index.html" class="bnav-item"><svg viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" fill="currentColor"/></svg><span>Home</span></a>
+    <a href="jadwal.html" class="bnav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg><span>Jadwal</span></a>
+    <a href="random.html" class="bnav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg><span>Random</span></a>
+    <a href="history.html" class="bnav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg><span>Riwayat</span></a>
+    <a href="saved.html" class="bnav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg><span>Simpan</span></a>
+    <a href="profile.html" class="bnav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span>Akun</span></a>
+  </div>
+</nav>
+
+<div class="toasts" id="toasts"></div>
+
+<script src="js/main.js"></script>
+<script src="js/anime.js"></script>
+</body>
+</html>
